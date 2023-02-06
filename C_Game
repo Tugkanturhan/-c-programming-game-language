@@ -1,0 +1,951 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include<windows.h>
+#include<conio.h>
+/*HER SEYI TAMAMLANMIS OYUNUM*/
+/*
+1)bazen can azaltmada hata olabiliyor
+2)tek sorun can kaldi sonra bitti
+3)sorunun ne oldugunu buldum 3 haneli sayidan iki haneli ye düşerken can  doğru şekilde azalıyor fakat ekranda 3 haneli sayinin birler basamağı ekranda görünüyor :(
+*/
+//can azakırken 3 haneli sayiya gelince silinmeden gorundugu icin hata gibi gorunuyor
+//EKLE:oyunu kaydetme 1. bolumu gectikten sonra 2. bolumde kapatmak istiyor doysaya bi sayi kaydedip dosyada okunudugunda kaldgı yerden devam etsin
+//EKLE:okcu disinda karaketer buda karakter secim ekrani ortaya cikarcak
+//daha fazla karakter
+//Hareketli arkaplan
+//Demircilik
+//Eşya üretme
+//patronlar dışışnda basit düşmanlar
+//secilebilir skill'ler *her karakterin kendine ozel yetenegi var..
+//EKLE:zarların toplamı kadar hareket mesafesi
+//EKLE:dusman yetenkeleri
+
+int s;//sayac
+int can=100,can1=100,can2=100;
+int seed;
+int hasar,dusmanhasari;
+int zar1,zar2,dusmanzar1,dusmanzar2,dusmanhasar;
+int dusmancan1=50,dusmancan2=75,dusmancan3=100,dusmancan4;//dusmanlarin devami gelecegi icin fazladan tanimladim
+int *p,*f;//her bosluk tusuna basilinca biseyler olsun dedim ama unutum simdi :D sabah aklima gelir//ama pointer ne  alaka 
+// her bosluguk tusuna basinca bir saga bir sola ekran oynasin ?? nasil yapabilrim ??? butun gordugum x lere 1 ekleyip 1 cikarasam
+//dusman yetenegi bizim karaktere gelince karkterin ustunde yıldızlar cıksın olunce kuru kafa ve ya melek olabilr
+
+int maceraya_basla();
+void karakter_ozellik();
+int menu();
+void hikaye();
+void gotoxy(int x, int y);
+void hidecursor();
+COORD c = {0, 0};
+void setxy (int x, int y)
+{
+ c.X = x; c.Y = y; // Set X and Y coordinates
+ SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+int sinir_cizgileri() //büyük ekrana alinca harita bozuluyor ??????//
+{ 
+    int j,i;
+ //sağ  sütün
+ for(i=0;i<30;i++){
+   setxy(119,i);
+   printf("%c",219);
+ }
+ //yukari satir
+ setxy(0,0); 
+ for(j=0;j<120;j++){
+    printf("%c",223);
+ }
+ //sol  sütün
+ for(i=0;i<30;i++){
+   setxy(0,i);
+   printf("%c",219);
+ }
+ //aşaği satir
+ setxy(0,29);
+ for(j=0;j<120;j++){
+   printf("%c",223);
+ }
+   getch();
+   return 0;
+}
+//can ve zar konumu//
+void can_bari_ve_zar()
+{
+    int x,y;
+    //senin can barin 
+    
+    gotoxy(3,2); printf(" ____________________\n");
+    gotoxy(3,3); printf("|                    |\n");
+    gotoxy(3,4); printf("|  CAN:              |\n");
+    gotoxy(3,5); printf("|____________________|\n");
+    //dusmanin can bari
+    
+    gotoxy(96,2); printf(" ____________________\n");
+    gotoxy(96,3); printf("|                    |\n");
+    gotoxy(96,4); printf("|  CAN:              |\n");
+    gotoxy(96,5); printf("|____________________|\n");
+ 
+    //zar1 senin zar
+    gotoxy(29,2);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+    gotoxy(29,3);printf("%c     %c\n",124,124);
+    gotoxy(29,4);printf("%c     %c\n",124,124);
+    gotoxy(29,5);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+    //zar2 senin zar
+    gotoxy(39,2);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+    gotoxy(39,3);printf("%c     %c\n",124,124);
+    gotoxy(39,4);printf("%c     %c\n",124,124);
+    gotoxy(39,5);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+
+    gotoxy(49,4);printf("ZAR");
+    //dusman zar 1
+    gotoxy(86,2);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+    gotoxy(86,3);printf("%c     %c\n",124,124);
+    gotoxy(86,4);printf("%c     %c\n",124,124);
+    gotoxy(86,5);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+    // dusman zar 2
+    gotoxy(76,2);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+    gotoxy(76,3);printf("%c     %c\n",124,124);
+    gotoxy(76,4);printf("%c     %c\n",124,124);
+    gotoxy(76,5);printf(" %c%c%c%c%c\n",95,95,95,95,95);
+
+    gotoxy(70,4);printf("ZAR");
+
+}
+//seytan tavsan//
+int karakter1()
+{
+    gotoxy(101,14);printf("%c%c     %c%c", 47,92,47,92);
+    gotoxy(100,15);printf("%c %c     %c %c", 47,47,92,92);
+    gotoxy(100,16);printf("%c %c     %c %c", 92,92,47,47);
+    gotoxy(101,17);printf("%c%c-----%c%c", 92,47,92,47);
+    gotoxy(101,18);printf("%c%c.   .%c%c", 124,79,79,124);
+    gotoxy(101,19);printf("%c.  +  .%c", 124,124);
+    gotoxy(101,20);printf("%c-------%c", 92,47);
+    gotoxy(101,21);printf("%c.%c%c%c%c%c.%c",124,124,124,124,124,124,124);                                
+    gotoxy(102,22);printf("%c.%c%c%c.%c", 124,124,124,124,124);
+    gotoxy(103,23);printf("%c%c%c%c%c", 124,95,95,95,124);
+    gotoxy(100,24);printf("%c%c%c%c%c%c%c%c%c%c%c",95,95,95,95,95,124,95,95,95,95,95);
+    gotoxy(99,25);printf("%c%c         %c%c", 47,124,124,92);
+    gotoxy(98,26);printf("%c %c         %c %c", 47,124,124,92);
+    gotoxy(97,27);printf("%c %c%c         %c%c %c", 47,47,124,124,92,92);
+    gotoxy(96,28);printf("%c %c %c         %c %c %c", 47,47,124,124,92,92);
+   
+    return 0;
+}
+void dusman_animasyon1()
+{
+    int i;
+    for(i=0;i<46;i++)
+    {
+    gotoxy(80-i,24); printf("/-----\\ ");
+    gotoxy(80-i,25);printf("|------|");
+    gotoxy(80-i,26);printf("\\-----/ ");
+    Sleep(50);
+    gotoxy(89-i,24);printf(" ");
+    gotoxy(91-i,25);printf(" ");
+    gotoxy(89-i,26);printf(" ");
+    gotoxy(34,24);printf("             ");
+    gotoxy(34,25);printf("             ");
+    gotoxy(34,26);printf("             ");
+    }
+        if(dusmanzar1 <= 3 && dusmanzar2 <=3){
+        gotoxy(25,22);printf("HAHAHA Sadece Gidikliyorsunnn :D");
+        Sleep(300);
+        gotoxy(25,22);printf("                                 ");
+    }
+    else{
+    if(dusmanzar1 > 3 && dusmanzar2 > 3){// geliba bu yanlış ama :D 
+        gotoxy(25,22);printf("AOVVV Bu Biraz Acitti ..");
+        Sleep(300);
+        gotoxy(25,22);printf("                                 ");
+    }
+    }
+}
+int karakter2()
+{
+    gotoxy(74,6);printf("                      ^     ^ ");
+    gotoxy(74,7);printf("                     ||    ||");
+    gotoxy(74,8);printf(" ^^  ^^  ^^         //      \\\\");
+    gotoxy(74,9);printf(" ||  ||  ||        //        \\\\");
+    gotoxy(74,10);printf("  || || ||         \\\\________//");
+    gotoxy(74,11);printf("  ||_||_||          |  \\  /  |");
+    gotoxy(74,12);printf("     ||             |  o < o |");
+    gotoxy(74,13);printf("     ||             |        |");
+    gotoxy(74,14);printf("     ||        _I_I_|_ '|||'_|_I_I_");
+    gotoxy(74,15);printf("     ||       /\\__/            \\__/\\");
+    gotoxy(74,16);printf("     ||      /                      \\");
+    gotoxy(74,17);printf("     ||     /  /|(_____)  (_____)|\\  \\");
+    gotoxy(74,18);printf("     ||    /  / |  (___)  (___)  | \\  \\");
+    gotoxy(74,19);printf("     ||   /  /  |  (___)  (___)  |  \\  \\");
+    gotoxy(74,20);printf("     ||  /  /   |  (___)  (___)  |   \\  \\");
+    gotoxy(74,21);printf("     || /  /    |    (__)(__)    |    \\  \\");
+    gotoxy(74,22);printf("    [|9___/     |    (__)(__)    |     \\  \\");
+    gotoxy(74,23);printf("     ||         |    (__)(__)    |      \\  \\");
+    gotoxy(74,24);printf("     ||         |     (____)     |       \\  \\");
+    gotoxy(74,25);printf("     ||         |     (____)     |        \\__\\");
+    gotoxy(74,26);printf("     ||         |________________|       ( ))))");
+    gotoxy(74,27);printf("     ||         |                |");
+    gotoxy(74,28);printf("     ||         |                |");
+    gotoxy(74,29);printf("     ||         |       /\\       |");
+}
+void dusman_animasyon2()
+{
+        gotoxy(20,8);printf("    ||");
+        gotoxy(20,9);printf("    ||");
+        gotoxy(20,10);printf("    ||");
+        gotoxy(20,11);printf("    ||");
+        gotoxy(20,12);printf("    ||");
+        gotoxy(20,13);printf("    ||");
+        gotoxy(20,14);printf("    ||");
+        gotoxy(20,15);printf("    ||");
+        gotoxy(20,16);printf("    ||");
+        gotoxy(20,17);printf("    ||");
+        gotoxy(20,18);printf("    ||");
+        gotoxy(20,19);printf("    ||");
+        gotoxy(20,20);printf("   _||_");
+        gotoxy(20,21);printf(" || || ||");
+        gotoxy(20,22);printf(" || || ||");
+        gotoxy(20,23);printf(" || || ||");
+        gotoxy(20,24);printf(" \\/ \\/ \\/");
+
+        Sleep(340);
+        gotoxy(20,8);printf("           ");
+        Sleep(320);
+        gotoxy(20,9);printf("            ");
+        Sleep(300);
+        gotoxy(20,10);printf("            ");
+        Sleep(280);
+        gotoxy(20,11);printf("            ");
+        Sleep(260);
+        gotoxy(20,12);printf("            ");
+        Sleep(240);
+        gotoxy(20,13);printf("            ");
+        Sleep(220);
+        gotoxy(20,14);printf("            ");
+        Sleep(200);
+        gotoxy(20,15);printf("            ");
+        Sleep(180);
+        gotoxy(20,16);printf("            ");
+        Sleep(160);
+        gotoxy(20,17);printf("            ");
+        Sleep(140);
+        gotoxy(20,18);printf("            ");
+        Sleep(120);
+        gotoxy(20,19);printf("            ");
+        Sleep(100);
+        gotoxy(20,20);printf("            ");
+        Sleep(80);
+        gotoxy(20,21);printf("            ");
+        Sleep(60);
+        gotoxy(20,22);printf("            ");
+        Sleep(40);
+        gotoxy(20,23);printf("            ");
+        Sleep(20);
+        gotoxy(20,24);printf("            ");
+
+
+        gotoxy(25,24);printf("AAAAAAAAA!!!!!!!!!!!");
+        Sleep(500);
+        gotoxy(25,24);printf("                     ");
+
+        if(dusmanzar1 <= 3 && dusmanzar2 <=3){
+        gotoxy(25,22);printf("HAHAHA Sadece Gidikliyorsunnn :D");
+        Sleep(300);
+        gotoxy(25,22);printf("                                 ");
+    }
+    else{
+    if(dusmanzar1 > 6 &&  dusmanzar2 > 6){
+        gotoxy(25,22);printf("AOVVV Bu Biraz Acitti ..");
+        Sleep(300);
+        gotoxy(25,22);printf("                                 ");
+    }
+    }
+
+}
+void karakter3()
+{  
+    gotoxy(103,9);printf("         W");
+    gotoxy(103,10);printf("     w*W* *W*w");
+    gotoxy(103,11);printf("      \\'.'.'/ ");
+    gotoxy(103,12);printf("       //``\\\\ ");
+    gotoxy(103,13);printf("      (/a a\\)");
+    gotoxy(103,14);printf("      (\\_-_/)  ");
+    gotoxy(103,15);printf("    .-~' = '~-.");
+    gotoxy(103,16);printf("   /`~` " "   `~`\\");
+    gotoxy(103,17);printf("  / / (_ * _)\\ \\");
+    gotoxy(103,18);printf(" / /   )   (  \\ \\");
+    gotoxy(103,19);printf(" \\ \\_/\\ \\_/ / / /");
+    gotoxy(103,20);printf("  \\/_)  '*' (_\\/");
+    gotoxy(103,21);printf("    |        |");
+    gotoxy(103,22);printf("    |        |");
+    gotoxy(103,23);printf("    |        |");
+    gotoxy(103,24);printf("    |        |");
+    gotoxy(103,25);printf("    |        |");
+    gotoxy(103,26);printf("    |        |");
+    gotoxy(103,27);printf("    |        |");
+    gotoxy(103,28);printf("    |        |");
+    gotoxy(103,29);printf("    w*w*WW*w*w");
+    getch();
+}
+void dusman_animasyon3()
+{
+    hidecursor();
+    gotoxy(90,22);printf(" |");
+    gotoxy(90,23);printf(" |   O");
+    gotoxy(90,24);printf(" |  /|\\");
+    gotoxy(90,25);printf("_|_/ | \\");
+    gotoxy(90,26);printf(" |/  |  \\");
+    gotoxy(90,27);printf("    / \\");
+    gotoxy(90,28);printf("   /   \\");
+    gotoxy(90,29);printf("  /     \\");
+    Sleep(35);
+    gotoxy(90,22);printf("              ");
+    gotoxy(90,23);printf("              ");
+    gotoxy(90,24);printf("              ");
+    gotoxy(90,25);printf("              ");
+    gotoxy(90,26);printf("              ");
+    gotoxy(90,27);printf("              ");
+    gotoxy(90,28);printf("              ");
+    gotoxy(90,29);printf("              ");
+    Sleep(35);
+    gotoxy(85,22);printf(" |      ");
+    gotoxy(85,23);printf(" |    O   ");
+    gotoxy(85,24);printf(" |   /|\\  ");
+    gotoxy(85,25);printf(" |  / | \\ ");
+    gotoxy(85,26);printf("_|_/  |  \\");
+    gotoxy(85,27);printf(" |   / \\");
+    gotoxy(85,28);printf("    /   \\");
+    gotoxy(85,29);printf("    \\    \\");
+    Sleep(35);
+    gotoxy(85,22);printf("              ");
+    gotoxy(85,23);printf("              ");
+    gotoxy(85,24);printf("              ");
+    gotoxy(85,25);printf("              ");
+    gotoxy(85,26);printf("              ");
+    gotoxy(85,27);printf("              ");
+    gotoxy(85,28);printf("              ");
+    gotoxy(85,29);printf("              ");
+    Sleep(35);   
+    gotoxy(80,22);printf(" |    ");
+    gotoxy(80,23);printf(" |    O ");
+    gotoxy(80,24);printf(" |   /|\\ ");
+    gotoxy(80,25);printf(" |  / | \\");
+    gotoxy(80,26);printf("_|_/  |  \\");
+    gotoxy(80,27);printf(" |   / \\");
+    gotoxy(80,28);printf("    /   \\");
+    gotoxy(80,29);printf("   /     \\");
+    Sleep(35);
+    gotoxy(80,22);printf("              ");
+    gotoxy(80,23);printf("              ");
+    gotoxy(80,24);printf("              ");
+    gotoxy(80,25);printf("              ");
+    gotoxy(80,26);printf("              ");
+    gotoxy(80,27);printf("              ");
+    gotoxy(80,28);printf("              ");
+    gotoxy(80,29);printf("              ");
+    Sleep(35);
+    gotoxy(75,22);printf(" |       ");
+    gotoxy(75,23);printf(" |    O   ");
+    gotoxy(75,24);printf(" |   /|\\  ");
+    gotoxy(75,25);printf(" |  / | \\ ");
+    gotoxy(75,26);printf("_|_/  |  \\");
+    gotoxy(75,27);printf(" |   / \\");
+    gotoxy(75,28);printf("    /   \\");
+    gotoxy(75,29);printf("    \\    \\  ");
+    Sleep(35);
+    gotoxy(75,22);printf("              ");
+    gotoxy(75,23);printf("              ");
+    gotoxy(75,24);printf("              ");
+    gotoxy(75,25);printf("              ");
+    gotoxy(75,26);printf("              ");
+    gotoxy(75,27);printf("              ");
+    gotoxy(75,28);printf("              ");
+    gotoxy(75,29);printf("              ");
+    Sleep(35);    
+    gotoxy(70,22);printf(" |       ");
+    gotoxy(70,23);printf(" |    O   ");
+    gotoxy(70,24);printf(" |   /|\\  ");
+    gotoxy(70,25);printf(" |  / | \\ ");
+    gotoxy(70,26);printf("_|_/  |  \\");
+    gotoxy(70,27);printf(" |   / \\");
+    gotoxy(70,28);printf("    /   \\");
+    gotoxy(70,29);printf("   /     \\");
+    Sleep(35);
+    gotoxy(70,22);printf("              ");
+    gotoxy(70,23);printf("              ");
+    gotoxy(70,24);printf("              ");
+    gotoxy(70,25);printf("              ");
+    gotoxy(70,26);printf("              ");
+    gotoxy(70,27);printf("              ");
+    gotoxy(70,28);printf("              ");
+    gotoxy(70,29);printf("              ");
+    Sleep(35);
+    gotoxy(65,22);printf(" |       ");
+    gotoxy(65,23);printf(" |    O  ");
+    gotoxy(65,24);printf(" |   /|\\  ");
+    gotoxy(65,25);printf(" |  / | \\ ");
+    gotoxy(65,26);printf("_|_/  |  \\");
+    gotoxy(65,27);printf(" |   / \\");
+    gotoxy(65,28);printf("    /   \\");
+    gotoxy(65,29);printf("    \\    \\");
+    Sleep(35);
+    gotoxy(65,22);printf("              ");
+    gotoxy(65,23);printf("              ");
+    gotoxy(65,24);printf("              ");
+    gotoxy(65,25);printf("              ");
+    gotoxy(65,26);printf("              ");
+    gotoxy(65,27);printf("              ");
+    gotoxy(65,28);printf("              ");
+    gotoxy(65,29);printf("              ");
+    Sleep(35);
+    gotoxy(60,22);printf(" |       ");
+    gotoxy(60,23);printf(" |    O   ");
+    gotoxy(60,24);printf(" |   /|\\  ");
+    gotoxy(60,25);printf(" |  / | \\ ");
+    gotoxy(60,26);printf("_|_/  |  \\");
+    gotoxy(60,27);printf(" |   / \\");
+    gotoxy(60,28);printf("    /   \\");
+    gotoxy(60,29);printf("   /     \\");
+    Sleep(35);
+    gotoxy(60,22);printf("              ");
+    gotoxy(60,23);printf("              ");
+    gotoxy(60,24);printf("              ");
+    gotoxy(60,25);printf("              ");
+    gotoxy(60,26);printf("              ");
+    gotoxy(60,27);printf("              ");
+    gotoxy(60,28);printf("              ");
+    gotoxy(60,29);printf("              ");
+    Sleep(35);
+    gotoxy(55,22);printf(" |       ");
+    gotoxy(55,23);printf(" |    O   ");
+    gotoxy(55,24);printf(" |   /|\\  ");
+    gotoxy(55,25);printf(" |  / | \\ ");
+    gotoxy(55,26);printf("_|_/  |  \\");
+    gotoxy(55,27);printf(" |   / \\");
+    gotoxy(55,28);printf("    /   \\");
+    gotoxy(55,29);printf("    \\    \\");
+    Sleep(35);
+    gotoxy(55,22);printf("              ");
+    gotoxy(55,23);printf("              ");
+    gotoxy(55,24);printf("              ");
+    gotoxy(55,25);printf("              ");
+    gotoxy(55,26);printf("              ");
+    gotoxy(55,27);printf("              ");
+    gotoxy(55,28);printf("              ");
+    gotoxy(55,29);printf("              ");
+    Sleep(35);    
+    gotoxy(50,22);printf("   |    ");
+    gotoxy(50,23);printf("   |    O   ");
+    gotoxy(50,24);printf("   |   /|\\  ");
+    gotoxy(50,25);printf("   |  / | \\");
+    gotoxy(50,26);printf("  _|_/  |  \\");
+    gotoxy(50,27);printf("   |   / \\");
+    gotoxy(50,28);printf("      /   \\");
+    gotoxy(50,29);printf("     /     \\");
+    Sleep(35);
+    gotoxy(50,22);printf("              ");
+    gotoxy(50,23);printf("              ");
+    gotoxy(50,24);printf("              ");
+    gotoxy(50,25);printf("              ");
+    gotoxy(50,26);printf("              ");
+    gotoxy(50,27);printf("              ");
+    gotoxy(50,28);printf("              ");
+    gotoxy(50,29);printf("              ");
+    Sleep(35);
+    gotoxy(45,22);printf(" \\``               ");
+    gotoxy(45,23);printf("  \\  ``    O       ");
+    gotoxy(45,24);printf("   \\   `  /|\\     ");
+    gotoxy(45,25);printf("    \\    / | \\   ");
+    gotoxy(45,26);printf("     \\/ /  |  \\");
+    gotoxy(45,27);printf("    / \\   / \\  ");
+    gotoxy(45,28);printf("         /   \\");
+    gotoxy(45,29);printf("         \\    \\");
+    Sleep(35);
+    gotoxy(45,9);printf("                 ");
+    gotoxy(45,22);printf("                ");
+    gotoxy(45,23);printf("                ");
+    gotoxy(45,24);printf("                ");
+    gotoxy(45,25);printf("                ");
+    gotoxy(45,26);printf("                ");
+    gotoxy(45,27);printf("                ");
+    gotoxy(45,28);printf("                ");
+    gotoxy(45,29);printf("                ");
+    Sleep(35); 
+    gotoxy(40,22);printf("           .~'`     ");   
+    gotoxy(40,23);printf("       .~'`          O       ");
+    gotoxy(40,24);printf("    .~'`            /|\\    ");
+    gotoxy(40,25);printf(" .~'`              / | \\  ");
+    gotoxy(40,26);printf(" _______________|_/  |  \\");
+    gotoxy(40,27);printf("                |   / \\  ");
+    gotoxy(40,28);printf("                   /   \\ ");
+    gotoxy(40,29);printf("                  /     \\ ");
+    Sleep(35);
+    gotoxy(40,22);printf("                           ");
+    gotoxy(40,23);printf("                           ");
+    gotoxy(40,24);printf("                            ");
+    gotoxy(40,25);printf("                                ");
+    gotoxy(40,26);printf("                                 ");
+    gotoxy(40,27);printf("                          ");
+    gotoxy(40,28);printf("                            ");
+    gotoxy(40,29);printf("                             ");
+}
+//ana karakterimiz//
+int okcu()
+{
+    gotoxy(20,24);printf("    O  \n");
+    gotoxy(20,25);printf("   /|\\|\\ \n");
+    gotoxy(20,26);printf("  / | |--|--> \n");
+    gotoxy(20,27);printf("   / \\|/ \n ");
+    gotoxy(21,28);printf(" /   \\");
+    return 0;
+}
+void ok_animasyon()
+{
+    int i;
+    for(i=34;i<90;i++){
+        gotoxy(i,26);printf(">----->");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(20);
+        gotoxy(89,26);printf("        ");
+    }
+    gotoxy(76,19);printf("SENI MAHVEDECEGIMM!!!!!");
+    Sleep(300);
+    gotoxy(76,19);printf("                        ");
+
+    
+}
+void ok_animasyon1()
+{
+    int i; 
+    for(i=34;i<73;i++){
+        gotoxy(i,26);printf(">----->");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(20);
+        gotoxy(72,26);printf("       ");
+    }
+    gotoxy(57,14);printf("SENII YOK EDECEGIM");
+    Sleep(500);
+    gotoxy(57,14);printf("                  ");
+}
+void ok_animasyon2()
+{
+    int i;
+    for(i=34;i<98;i++){//bunlar boss olabilr
+        gotoxy(i,26);printf(">----->");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(20);
+        gotoxy(97,26);printf("        ");
+    }
+}
+void ok_yagmuru()
+{
+    int i,k,l,t;
+    seed=time(0);
+    srand(seed);
+    if(zar1 == 6 && zar2 == 6){//bunlar boss olabilr
+        system("color 4");
+        for(i=0;i<20;i++){
+            k=60+rand()%85;
+            l=10+rand()%15;
+            Sleep(250);
+            gotoxy(k,l);  printf("v"); 
+            gotoxy(k,--l);printf("|");
+            gotoxy(k,--l);printf("V");
+            Sleep(250);
+            gotoxy(k,l+2);printf(" ");
+            gotoxy(k,l+1);printf(" ");
+            gotoxy(k,l);printf(" ");
+        }
+    system("COLOR F");
+    getch();
+    }
+}
+void seri_ok()
+{
+    int i;
+    if(zar1 == 4 && zar2 == 4){//bunlar boss olabilr
+        system("COLOR 2");
+    for(i=34;i<90;i++){
+        gotoxy(i,26);printf(">----->");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(5);
+        gotoxy(89,26);printf("        ");
+    }
+    Sleep(10);
+    for(i=34;i<90;i++){
+        gotoxy(i,26);printf(">----->");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(5);
+        gotoxy(89,26);printf("        ");
+    }
+    Sleep(10);
+    for(i=34;i<90;i++){
+        gotoxy(i,26);printf(">----->");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(5);
+        gotoxy(89,26);printf("        ");
+    }    
+        system("COLOR F");
+        getch();
+        }
+}
+void guclu_ok()
+{
+    int i;
+    if(zar1 == 5 &&  zar2 == 5){
+    system("COLOR 1");
+    for(i=34;i<90;i++){
+        gotoxy(i,26);printf(">|============|>");
+        gotoxy(i-1,26);printf(" ");
+        Sleep(5);
+        gotoxy(89,26);printf("                ");  
+    }
+    system("COLOR F");
+    getch();
+    }
+}  
+int zar()
+{
+   
+    /*kolay zorluk*/
+    seed=time(0);
+    srand(seed);
+    //senin hasarin
+    zar1=1+rand()%6;//3+rand()%6 arasında sapıtıyor farklı sonuçlar veriyor neden?
+    zar2=1+rand()%6;
+    hasar=zar1+zar2;
+
+    /*
+    hasar=(zar1==6 ? ( zar2==6 ? 32 : zar1+zar2) : zar1+zar2);
+    hasar=(zar1==5 ? ( zar2==5 ? 25 : zar1+zar2) : zar1+zar2);
+    hasar=(zar1==4 ? ( zar2==4 ? 15 : zar1+zar2) : zar1+zar2);
+    */
+    //düşamini hasari
+    dusmanzar1=1+rand()%6;
+    dusmanzar2=1+rand()%6;
+    dusmanhasar=dusmanzar1+dusmanzar2;
+
+    return 0;
+}
+int zar_animasyon()
+{
+    int j,i,x,y;
+    for(i=1;i<=zar1;i++){
+        Sleep(150);
+        gotoxy(32,4);printf("%d",i);
+    }//bazen bozuluyor ??????? sebepsiz yere 
+    for(j=1;j<=zar2;j++){
+        Sleep(150);
+        gotoxy(42,4);printf("%d",j);    
+    }
+    for(x=1;x<=dusmanzar1;x++){
+        Sleep(150);
+        gotoxy(89,4);printf("%d",x);
+    }
+    for(y=1;y<=dusmanzar2;y++){
+        Sleep(150);
+        gotoxy(79,4);printf("%d",y);
+    }
+
+}
+int canazalma()
+{
+    //can azalma alt programı ile denedim//
+    can=can-dusmanhasar;
+    dusmancan1=dusmancan1-hasar;
+    gotoxy(10,4);printf("%d",can);
+    gotoxy(103,4);printf("%d",dusmancan1);
+}
+int canazalma1()
+{
+    //ikinci dusman ile karşılaşinca canin sifirlanması gerkiyor
+    can1=can1-dusmanhasar;
+    dusmancan2=dusmancan2-hasar;
+    gotoxy(10,4);printf("%d",can1);
+    gotoxy(103,4);printf("%d",dusmancan2);
+    
+}
+int canazalma2()
+{
+    can2=can2-dusmanhasar;
+    dusmancan3=dusmancan3-hasar;
+    gotoxy(10,4);printf("%d",can2);
+    gotoxy(103,4);printf("%d",dusmancan3);
+}
+void hikaye()
+{
+    int y;
+    //AAHAHAHAHA COK HOSUMA GITTI YAAAAA AAHAHAHA
+    for(y=0;y<8;y++){
+        gotoxy(10,9-y);printf("DUNYAYI ELE GECIREN DUSMANLARIN KARSISINDA KISA BOYLU YAY KULLANAN BIR ADAM VARDI");
+        Sleep(600);
+        gotoxy(10,9-y);printf("                                                                                 ");
+    }
+
+    for(y=0;y<8;y++)
+    {
+        gotoxy(10,9-y);printf("BU KOCA YUREKLI ADAM DUNYAYI KURTARMAK ICIN COK SEY FEDA ETTI..");
+        Sleep(600);
+        gotoxy(10,9-y);printf("                                                               ");
+    }
+
+    for(y=0;y<8;y++)
+    {
+        gotoxy(10,9-y);printf("DUNYAYI ELE GECIREN 3 DUSMAN PATRONU VARDI..");
+        Sleep(600);
+        gotoxy(10,9-y);printf("                                            ");
+    }
+
+    for(y=0;y<8;y++)
+    {
+        gotoxy(10,9-y);printf("BU DUSMANLARIN ADI SIRASIYLA SEYTAN TAVSAN , ATLANTISIN MUHAFIZI , GUZELLIKLERIN KRALICESI");
+        Sleep(600);
+        gotoxy(10,9-y);printf("                                                                                          ");
+    }
+
+    for(y=0;y<8;y++)
+    {
+        gotoxy(10,9-y);printf("VE ARTIK BU KAHRAMANIN MACERASINI IZLME VAKTI GELDI");
+        Sleep(600);
+        gotoxy(10,9-y);printf("                                                               ");
+    }
+
+}
+int main()
+{   
+    
+    int y;
+    hikaye();
+    int secim=menu();
+    while(secim!=0){//while true ve false degerlerini dondurudugu icin default kullanmadim sor default kullanilrimi die ???
+        switch(secim){
+            case 1: maceraya_basla(); 
+            break;
+            case 2: karakter_ozellik();
+            break;
+        }
+        secim=menu();
+    }
+    hidecursor();
+    return 0; 
+}
+int menu()
+{
+    int secim1;
+        printf("\n\n\n");
+        printf("\t\t    |============================DUNYAYI  KURTARMA=============================|\n");
+        printf("\t\t   |===================================MENU=====================================|\n");
+        printf("\t\t1)|==============================Maceraya  Basla=================================|\n");
+        printf("\t\t2)|===============================Oyun  Hakkinda=================================|\n");
+        do{
+        printf("\t\t\tSeciminiz : [1/2]   :"); 
+        secim1 = getche() - '0';
+        }
+        while (secim1<0 || secim1>5);
+        system("CLS");
+        return secim1;
+}
+void karakter_ozellik()
+{
+    int a;
+    system("CLS");
+        printf("Okcu Yetenekleri : \n");
+        printf("------------------\n");
+        printf("Zar eger 6 6 gelirse ok yagmuru yetengini kullanirsin ve ekstra 20 hasar vurusun.\n");
+        printf("Zar eger 5 5 gelirse guclu ok yetenegi kullanirsin ve ekstra 15 hasar vurusun.\n");
+        printf("Zar eger 4 4 gelirse seri ok yetenegini kullanirsin ve ekstera 10 hasar vurusun.\n");
+        printf("Zar eger 2 2 gelirse 40 canlik iylestirme alirsin.\n");
+        printf("Zar eger 1 1 gelirse 20 canlik iylestirme alirsin.\n");
+        printf("Ana menuye donemk icin 1'i oyuna baslamak icin ise 2'yi tuslayiniz:\n");
+        label4:
+        scanf("%d",&a);
+        system("CLS");
+        if(a==1){
+            menu();
+        }
+        if(a==2){
+            maceraya_basla();
+        }
+        else{
+            if(a > 2){
+                printf("Tekrar Giriniz..");
+                goto label4;//degeisecek
+            }
+        }
+}
+int maceraya_basla()
+{
+    int a,k;
+    int vur;
+    while(dusmancan1>0)//birinci bolum
+    {
+    hidecursor();
+    sinir_cizgileri();
+    karakter1();
+    okcu();
+    zar();
+    can_bari_ve_zar();
+    zar_animasyon();
+    dusman_animasyon1();
+    if(zar1 == 6 && zar2 == 6){
+        ok_yagmuru();
+        dusmancan1=dusmancan1-20;
+    }
+    if(zar1 == 5 && zar2 == 5){
+        guclu_ok();
+        dusmancan1=dusmancan1-15;
+    }
+    if(zar1 == 4 && zar2 ==4){
+        seri_ok();
+        dusmancan1=dusmancan1-10;
+    }
+    if(zar1 == 1 && zar2 == 1){
+        can=can+20;
+    }
+    if(zar1 == 2 && zar2 == 2){
+        can=can+40;
+    }
+    
+    canazalma();
+    vur=_getch();
+    if(vur == '\x20'){
+        //if()
+        ok_animasyon();//dogru
+    }
+    if(can<0)
+    {
+        system("CLS");
+        printf("Oldunuz.. :/ oyunu kaptamak icin 1'i yeni oyuna baslamak icin 2'yi tuslayin\n");
+        scanf("%d",&k);
+        switch(k)
+        {
+            case 1: exit(1);
+            break;
+            case 2: maceraya_basla();
+            break;
+        }
+    }
+    }
+    system("cls");
+    gotoxy(20,16);printf("Tebrikler Kazandizniz Bir Sonraki Bolume Geciyorsunuz..");
+    Sleep(1500);
+    system("cls");
+    Sleep(800);
+    while(dusmancan2>0)//ikinici bolum
+    {
+        hidecursor();
+        sinir_cizgileri();
+        karakter2();
+        okcu();
+        zar();
+        can_bari_ve_zar();
+        zar_animasyon();
+        dusman_animasyon2();
+            if(zar1 == 6 && zar2 == 6){
+                    ok_yagmuru();
+                    hasar=32;
+                }
+            if(zar1 == 5 && zar2 == 5){
+                    guclu_ok();
+                    hasar=25;
+                }
+            if(zar1 == 4 && zar2 ==4){
+                    seri_ok();
+                    hasar=18;
+                }
+            if(zar1 == 1 && zar2 == 1){
+                    can1=can1+20;
+                }
+            if(zar1 == 2 && zar2 == 2){
+                    can1=can1+40;
+                }
+            canazalma1();
+            vur=_getch();
+            if(vur == '\x20'){
+                //if()
+                ok_animasyon1();//dogru
+            }
+            if(can1<0)
+            {
+                system("CLS");
+                printf("Oldunuz.. :/ oyunu kaptamak icin 1'i yeni oyuna baslamak icin 2'yi tuslayin\n");
+                scanf("%d",&k);
+                switch(k)
+                {
+                    case 1: exit(1);
+                    break;
+                    case 2: maceraya_basla();
+                    break;
+                }
+            }
+    }
+    system("cls");
+    gotoxy(20,16);printf("Tebrikler Kazandizniz Bir Sonraki Bolume Geciyorsunuz..");
+    Sleep(1500);
+    system("cls");
+    Sleep(800);
+    while(dusmancan3>0)
+    {
+        hidecursor();
+        sinir_cizgileri();
+        karakter3();
+        okcu();
+        zar();
+        can_bari_ve_zar();
+        zar_animasyon();
+        dusman_animasyon3();
+            if(zar1 == 6 && zar2 == 6){
+                    ok_yagmuru();
+                    hasar=32;
+                }
+            if(zar1 == 5 && zar2 == 5){
+                    guclu_ok();
+                    hasar=25;
+                }
+            if(zar1 == 4 && zar2 ==4){
+                    seri_ok();
+                    hasar=18;
+                }
+            if(zar1 == 1 && zar2 == 1){
+                    can1=can1+20;
+                }
+            if(zar1 == 2 && zar2 == 2){
+                    can1=can1+40;
+                }
+            canazalma2();
+            vur=_getch();
+            if(vur == '\x20'){
+                //if()
+                ok_animasyon2();//dogru
+            }
+            if(can<0)
+            {
+                system("CLS");
+                printf("Oldunuz.. :/ oyunu kaptamak icin 1'i yeni oyuna baslamak icin 2'yi tuslayin\n");
+                scanf("%d",&k);
+                switch(k)
+                {
+                    case 1: exit(1);
+                    break;
+                    case 2: maceraya_basla();
+                    break;
+                }
+            }
+    }
+    system("CLS");
+    printf("TEBIRKELR 2 DUSMANI DA YENEREK DUNAYYI KURTARDINIZZZZ..");
+    Sleep(1500);
+    exit(1);
+}
+void hidecursor()
+{
+	CONSOLE_CURSOR_INFO cursor_info={1,0}; 
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE),&cursor_info);	
+}
+void gotoxy(int x, int y)
+{
+	COORD Pos = { x - 1, y - 1 };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
+}
+//bitti
